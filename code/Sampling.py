@@ -1,20 +1,6 @@
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 import time
-#import csv
-#import pandas as pd
-#import matplotlib
-#import random
-#from matplotlib import pyplot as plt
-#import seaborn as sns
-#from numpy import linalg as LA
-#from scipy.spatial.distance import cdist
-#from sklearn.model_selection import train_test_split
-#from sklearn.neighbors import LocalOutlierFactor
-#from sklearn.cluster import DBSCAN
-#from sklearn import preprocessing
-#from sklearn.linear_model import LogisticRegression
-#from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 
 from tqdm import tqdm, tqdm_notebook
@@ -23,15 +9,10 @@ from recourse.builder import RecourseBuilder
 from recourse.builder import ActionSet
 
 # import functions
-import Helpers
-import Evaluation
-import Graph
+import code.Helpers as Helpers
+import code.Evaluation as Evaluation
+import code.Graph as Graph
 
-#import Encoder
-#import Decoder
-#import Generator
-#import Loglik
-#import LaugelEtAl
 np.random.seed(619)
 
 def print_loss(epoch, start_time, avg_loss, avg_KL_s, avg_KL_z):
@@ -42,7 +23,7 @@ def print_loss(epoch, start_time, avg_loss, avg_KL_s, avg_KL_z):
 ############################# Running the C-CHVAE search   ##########################
 # -----------------------------------------------------------------------------------#
 
-def sampling(settings, types_dict, types_dict_c, out, ncounterfactuals, clf, n_batches_train, n_samples_train, k, n_input, degree_active):
+def sampling(settings, types_dict, types_dict_c, out, ncounterfactuals, classifier, n_batches_train, n_samples_train, k, n_input, degree_active):
 
     argvals = settings.split()
     args = Helpers.getArgs(argvals)
@@ -326,7 +307,7 @@ def sampling(settings, types_dict, types_dict_c, out, ncounterfactuals, clf, n_b
                     d_scale = np.sum(np.abs(scaled_tilde - replicated_scaled_test), axis=1)
 
                     x_tilde = np.c_[test_data_c_replicated, x_tilde]
-                    y_tilde = clf.predict(x_tilde)
+                    y_tilde = classifier.predict(x_tilde)
 
                     indices_adv = np.where(y_tilde == 0)[0]
 

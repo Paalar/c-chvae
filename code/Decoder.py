@@ -16,8 +16,8 @@ def decoder(samples_z, z_dim, y_dim, y_dim_partition, batch_size, types_list):
     with tf.GradientTape() as g_1:
         g_1.watch(samples_z)
         # Create deterministic layer y
-        samples['y'] = tf.layers.dense(inputs=samples_z, units=y_dim, activation=None,
-                                   kernel_initializer=tf.random_normal_initializer(stddev=0.05), name='layer_h1_', reuse=None)
+        samples['y'] = tf.compat.v1.layers.dense(inputs=samples_z, units=y_dim, activation=None,
+                                   kernel_initializer=tf.compat.v1.random_normal_initializer(stddev=0.05), name='layer_h1_', reuse=None)
 
     gradients['g1'] = g_1.gradient(samples['y'], samples_z)
 
@@ -54,8 +54,8 @@ def y_partition(samples_y, types_list, y_dim_partition):
 
 def observed_data_layer(observed_data, output_dim, name, reuse):
     # Train a layer with the observed data and reuse it for the missing data
-    obs_output = tf.layers.dense(inputs=observed_data, units=output_dim, activation=None,
-                                 kernel_initializer=tf.random_normal_initializer(stddev=0.05), name=name, reuse=reuse,
+    obs_output = tf.compat.v1.layers.dense(inputs=observed_data, units=output_dim, activation=None,
+                                 kernel_initializer=tf.compat.v1.random_normal_initializer(stddev=0.05), name=name, reuse=reuse,
                                  trainable=True)
 
     return obs_output
@@ -68,7 +68,7 @@ def theta_estimation_from_y(samples_y, types_list, batch_size, reuse):
     for i, d in enumerate(samples_y):
 
         observed_y = samples_y[i]
-        nObs = tf.shape(observed_y)[0]
+        nObs = tf.shape(input=observed_y)[0]
 
         # Different layer models for each type of variable
         if types_list[i]['type'] == 'real':
@@ -143,8 +143,8 @@ def decoder_test_time(samples_z, z_dim, y_dim, y_dim_partition, batch_size, type
     samples['z'] = samples_z
 
     # Create deterministic layer y
-    samples['y'] = tf.layers.dense(inputs=samples_z, units=y_dim, activation=None,
-                                   kernel_initializer=tf.random_normal_initializer(stddev=0.05), name='layer_h1_',
+    samples['y'] = tf.compat.v1.layers.dense(inputs=samples_z, units=y_dim, activation=None,
+                                   kernel_initializer=tf.compat.v1.random_normal_initializer(stddev=0.05), name='layer_h1_',
                                    reuse=True)
 
     grouped_samples_y = y_partition(samples['y'], types_list, y_dim_partition)

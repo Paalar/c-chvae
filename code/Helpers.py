@@ -35,8 +35,8 @@ def getArgs(argv=None):
     parser.add_argument('--save_file', type=str, default='new_mnist_zdim5_ydim10_4images_', help='Save file name')
     parser.add_argument('--data_file', type=str, default='MNIST_data', help='File with the data')
     parser.add_argument('--data_file_c', type=str, default='MNIST_data', help='File with the conditioning data')
-    parser.add_argument('--types_file', type=str, default='mnist_train_types2.csv', help='File with the types of the data')
-    parser.add_argument('--types_file_c', type=str, default='mnist_train_types2.csv', help='File with the types of the conditioning data')
+    parser.add_argument('--types_file', type=str, default='data/heloc/heloc_types_alt.csv', help='File with the types of the data')
+    parser.add_argument('--types_file_c', type=str, default='data/heloc/heloc_types_c_alt.csv', help='File with the types of the conditioning data')
     parser.add_argument('--classifier', type=str, default='RLinearR', help='Classification model (RandomForest, SVM or else RLinearR)')
     parser.add_argument('--classifier_two', type=str, default='RandomForest', help='Classification model (RandomForest, SVM or else RLinearR)')
     parser.add_argument('--norm_latent_space', type=int, default=2, help='To measure distance between latent variables')
@@ -261,7 +261,7 @@ def place_holder_types(types_file, batch_size):
     # Create placeholders for every data type, with appropriate dimensions
     batch_data_list = []
     for i in range(len(types_list)):
-        batch_data_list.append(tf.placeholder(tf.float32, shape=(None, types_list[i]['dim'])))
+        batch_data_list.append(tf.compat.v1.placeholder(tf.float32, shape=(None, int(types_list[i]['dim']))))
     tf.concat(batch_data_list, axis=1)
 
     return batch_data_list, types_list
@@ -278,12 +278,12 @@ def batch_normalization(batch_data_list, types_list, batch_size):
 
         if types_list[i]['type'] == 'real':
             # We transform the data to a gaussian with mean 0 and std 1
-            data_mean, data_var = tf.nn.moments(observed_data, 0)
+            data_mean, data_var = tf.nn.moments(x=observed_data, axes=0)
             data_var = tf.clip_by_value(data_var, 1e-6, 1e20)  # Avoid zero values
             aux_X = tf.nn.batch_normalization(observed_data, data_mean, data_var, offset=0.0, scale=1.0,
                                               variance_epsilon=1e-6)
 
-            aux_X_noisy = aux_X + tf.random_normal((batch_size, 1), 0, 0.05, dtype=tf.float32)
+            aux_X_noisy = aux_X + tf.random.normal((batch_size, 1), 0, 0.05, dtype=tf.float32)
 
             normalized_data.append(aux_X)
             noisy_data.append(aux_X_noisy)
@@ -293,8 +293,8 @@ def batch_normalization(batch_data_list, types_list, batch_size):
         elif types_list[i]['type'] == 'pos':
 
             # We transform the log of the data to a gaussian with mean 0 and std 1
-            observed_data_log = tf.log(1 + observed_data)
-            data_mean_log, data_var_log = tf.nn.moments(observed_data_log, 0)
+            observed_data_log = tf.math.log(1 + observed_data)
+            data_mean_log, data_var_log = tf.nn.moments(x=observed_data_log, axes=0)
             data_var_log = tf.clip_by_value(data_var_log, 1e-6, 1e20)  # Avoid zero values
             aux_X = tf.nn.batch_normalization(observed_data_log, data_mean_log, data_var_log, offset=0.0, scale=1.0,
                                               variance_epsilon=1e-6)
@@ -305,8 +305,8 @@ def batch_normalization(batch_data_list, types_list, batch_size):
         elif types_list[i]['type'] == 'count':
 
             # We transform the log of the data to a gaussian with mean 0 and std 1
-            observed_data_log = tf.log(1 + observed_data)
-            data_mean_log, data_var_log = tf.nn.moments(observed_data_log, 0)
+            observed_data_log = tf.math.log(1 + observed_data)
+            data_mean_log, data_var_log = tf.nn.moments(x=observed_data_log, axes=0)
             data_var_log = tf.clip_by_value(data_var_log, 1e-6, 1e20)  # Avoid zero values
             aux_X = tf.nn.batch_normalization(observed_data_log, data_mean_log, data_var_log, offset=0.0, scale=1.0,
                                               variance_epsilon=1e-6)
@@ -318,9 +318,9 @@ def batch_normalization(batch_data_list, types_list, batch_size):
         else:
             # Don't normalize the categorical and ordinal variables
             normalized_data.append(d)
-            normalization_parameters.append(tf.convert_to_tensor([0.0, 1.0], dtype=tf.float32))  # No normalization here
+            normalization_parameters.append(tf.convert_to_tensor(value=[0.0, 1.0], dtype=tf.float32))  # No normalization here
 
-            aux_X_noisy = d + tf.random_normal((batch_size, 1), 0, 0.05, dtype=tf.float32)
+            aux_X_noisy = d + tf.random.normal((batch_size, 1), 0, 0.05, dtype=tf.float32)
             noisy_data.append(aux_X_noisy)
 
 

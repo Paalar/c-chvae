@@ -1,11 +1,11 @@
 
 import tensorflow as tf
 import numpy as np
-import Helpers
-import Encoder
-import Decoder
-import Evaluation
-import Generator
+import code.Helpers as Helpers
+import code.Encoder as Encoder
+import code.Decoder as Decoder
+import code.Evaluation as Evaluation
+import code.Generator as Generator
 
 # MASTER of Disaster
 
@@ -19,9 +19,9 @@ def C_HVAE_graph(types_file, learning_rate=1e-4, z_dim=1, y_dim=1, s_dim=1, y_di
 
 
     # Placeholder for batch_size (required for counterfactual search loop)
-    batch_size = tf.placeholder(dtype=tf.int32)
+    batch_size = tf.compat.v1.placeholder(dtype=tf.int32)
     # Placeholder for Gumbel-softmax parameter
-    tau = tf.placeholder(tf.float32, shape=())
+    tau = tf.compat.v1.placeholder(tf.float32, shape=())
     batch_data_list, types_list = Helpers.place_holder_types(types_file, batch_size)
 
     # Batch normalization of the data
@@ -78,7 +78,7 @@ def C_HVAE_graph(types_file, learning_rate=1e-4, z_dim=1, y_dim=1, s_dim=1, y_di
                                                           y_dim_output,
                                                           s_dim)
 
-    optim = tf.train.AdamOptimizer(learning_rate).minimize(-ELBO)
+    optim = tf.compat.v1.train.AdamOptimizer(learning_rate).minimize(-ELBO)
 
     # -----------------------------------------------------------------------------------#
     # Generator function for test time sample generation
@@ -155,9 +155,9 @@ def C_CHVAE_graph(types_file, types_file_c, learning_rate=1e-3, z_dim=1, y_dim=1
 
     # c: short for 'conditional'
     # Placeholder for batch_size (required for counterfactual search loop)
-    batch_size = tf.placeholder(dtype=tf.int32)
+    batch_size = tf.compat.v1.placeholder(dtype=tf.int32)
     # Placeholder for Gumbel-softmax parameter
-    tau = tf.placeholder(tf.float32, shape=())
+    tau = tf.compat.v1.placeholder(tf.float32, shape=())
     batch_data_list, types_list = Helpers.place_holder_types(types_file, batch_size)
     batch_data_list_c, types_list_c = Helpers.place_holder_types(types_file_c, batch_size)
 
@@ -213,7 +213,7 @@ def C_CHVAE_graph(types_file, types_file_c, learning_rate=1e-3, z_dim=1, y_dim=1
                                                           y_dim_output,
                                                           s_dim)
 
-    optim = tf.train.AdamOptimizer(learning_rate).minimize(-ELBO)
+    optim = tf.compat.v1.train.AdamOptimizer(learning_rate).minimize(-ELBO)
 
     # -----------------------------------------------------------------------------------#
     # Generator function for test time sample generation

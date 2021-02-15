@@ -52,7 +52,7 @@ def getArgs(argv=None):
 
 def next_batch(data, types_dict, batch_size, index_batch):
 
-    # Create minibath
+    # Create minibatch
     batch_xs = data[index_batch * batch_size:(index_batch + 1) * batch_size, :]
 
     # Slipt variables of the batches
